@@ -1,0 +1,64 @@
+    def method_kren(self):
+        result = []
+        cur_polynom = PolynomialRing(self.coefficients)
+        is_end = False
+        while not is_end:
+            n = max(cur_polynom.coefficients.keys())
+            for i in range(1, math.ceil(n / 2)+1):
+                is_find = False
+                m = i
+                divisors = []
+                for k in range(0, m + 1):
+                    solve = cur_polynom.solve(k)
+                    if solve == 0:
+                        polynom = PolynomialRing({0: -k, 1: 1})
+                        result.append(polynom)
+                        cur_polynom = cur_polynom / polynom
+                        is_find = True
+                        break
+                    divisors.append(self.get_divisor_list(solve))
+                if is_find:
+                    break
+                print(divisors)
+                U = [u for u in itertools.product(*divisors)]
+                print(U)
+                for y_values in U:
+                    x_values = []
+                    for i in range(len(y_values)):
+                        x_values.append(i)
+                    lagrange_polynom = self.create_lagrange_polynom(x_values, y_values)
+                    if lagrange_polynom != PolynomialRing({0: 0}):
+                        # print(f'Текущий / Лагранж = {cur_polynom % lagrange_polynom}')
+                        if cur_polynom % lagrange_polynom == [] and len(lagrange_polynom.coefficients) == m + 1:
+                            lagrange_polynom.normalize()
+                            cur_polynom = cur_polynom / lagrange_polynom
+                            result.append(lagrange_polynom)
+                            is_find = True
+                            break
+                if is_find:
+                    break
+                is_end = True
+        result.append(cur_polynom)
+        for p in result:
+            print(p)
+
+    def create_lagrange_polynom(self, x_values, y_values):
+        result_polynom = PolynomialRing({0: 0})
+        for i in range(len(y_values)):
+            result_polynom += y_values[i] * self.create_sub_lagrange(x_values, i)
+        return result_polynom
+
+    @staticmethod
+    def create_sub_lagrange(x_values, index):
+        result_polynom = PolynomialRing({0: 1})
+        summary = 1
+        for i in range(len(x_values)):
+            if i == index:
+                continue
+            summary *= x_values[index] - x_values[i]
+            pol = PolynomialRing({1: 1})
+            pol.coefficients[0] = -x_values[i]
+            result_polynom *= pol
+        if summary == 0:
+            return PolynomialRing({0: 0})
+        return result_polynom / summary
