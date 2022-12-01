@@ -154,7 +154,7 @@ public class Polynomial<T extends Arithmetical> {
         return res;
     }
 
-    public static void privateFft(List<Complex> a, boolean invert) {
+    private static void privateFft(List<Complex> a, boolean invert) {
         int n = a.size();
         if (n == 1) {
             return;
