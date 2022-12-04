@@ -132,17 +132,17 @@ public class Polynomial<T extends Arithmetical> {
         }
     }
 
-    public Map<Complex, Complex> fft() {
+    public List<Pair<Complex, Complex>> fft() {
         List<Complex> result = Arrays.stream(coeffs)
             .map(coeff -> Complex.ofCartesian((double) coeff.getValue(), 0))
             .collect(Collectors.toList());
         privateFft(result, false);
 
 
-        Map<Complex, Complex> map = new HashMap<>();
+        List<Pair<Complex, Complex>> map = new ArrayList<>();
         List<Complex> nthRoot = Complex.ofCartesian(1, 0).nthRoot(result.size());
         for (int i = 0; i < result.size(); ++i) {
-            map.put(nthRoot.get(i), result.get(i));
+            map.add(new Pair<>(nthRoot.get(i), result.get(i)));
         }
 
         return map;
@@ -203,6 +203,7 @@ public class Polynomial<T extends Arithmetical> {
                 int m = i;
                 List<List<Integer>> divisors = new ArrayList<>();
                 for (int k = 0; k < m + 1; ++k) {
+                    System.out.printf("\nx = %d%n", k);
                     RealNumber solve = curPolynom.value(new RealNumber(k));
                     if (solve.getValue() == 0) {
                         Polynomial<RealNumber> polynom = new Polynomial<>(new RealNumber[]{new RealNumber(-k), new RealNumber(1)});
@@ -235,7 +236,7 @@ public class Polynomial<T extends Arithmetical> {
                     Polynomial<RealNumber> lagrangePolynomial = createLagrangePolynomial(xValues, yValues);
                     if (lagrangePolynomial.coeffs.length != 1 || !coeffs[0].getAdditionNeutralElement().equals(lagrangePolynomial.coeffs[0])) {
                         Polynomial<RealNumber> remainder = curPolynom.mod(lagrangePolynomial);
-                        System.out.printf("(Текущий многочлен) mod (многочлен Лагранжа) = %s%n", remainder.toString());
+                        System.out.printf("(Текущий многочлен = %s) mod (многочлен Лагранжа = %s) = %s%n", curPolynom, lagrangePolynomial, remainder.toString());
                         if (remainder.coeffs.length == 1 && coeffs[0].getAdditionNeutralElement().equals(remainder.coeffs[0]) && lagrangePolynomial.coeffs.length == m + 1) {
                             lagrangePolynomial = lagrangePolynomial.divide(lagrangePolynomial.coeffs[lagrangePolynomial.coeffs.length - 1]);
                             System.out.printf("%s / %s = ", curPolynom.toString(), lagrangePolynomial.toString());
@@ -254,7 +255,7 @@ public class Polynomial<T extends Arithmetical> {
             }
         }
         result.add(curPolynom);
-        result.removeIf(r -> new Polynomial<>(new RealNumber[]{new RealNumber(1)}).equals(r));
+        //result.removeIf(r -> r.coeffs.length < 2);
         return result;
     }
 
@@ -452,7 +453,7 @@ public class Polynomial<T extends Arithmetical> {
     }
 
     public Polynomial<T> privateGcd(Polynomial<T> other) {
-        if (removeRedundantZeroes(other).coeffs.length == 1 && coeffs[0].getAdditionNeutralElement().equals(other.coeffs[0])) {
+        if (removeRedundantZeroes(other).coeffs.length == 1) {
             return this;
         }
         if (less(other)) {

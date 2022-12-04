@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
-        // x^4+x^3+3x^2+4x+1
-        // x^2+x^3+x+1
+        // 2x^3+3x^2-4x-1
+        // 2x^2-3x+1
         // 5
         // 1/1 4/1 3/1 1/1 1/1
         // 1/1 1/1 1/1 1/1
@@ -37,10 +37,16 @@ public class Main {
         System.out.print("Неприводимые многочлены: ");
         polynomials.forEach(polyn -> System.out.print(polyn.toString() + "; "));
         System.out.println("\nПрямой Фурье:");
-        Map<Complex, Complex> complexes = polynomial1.fft();
+        List<Pair<Complex, Complex>> complexes = polynomial1.fft();
         System.out.println(complexes);
         System.out.println("Обратный Фурье:");
-        System.out.println(Polynomial.reverseFft(new ArrayList<>(complexes.values())));
+        System.out.println(Polynomial.reverseFft(
+                new ArrayList<>(complexes.stream()
+                    .map(x -> x.right)
+                    .collect(Collectors.toList())
+                )
+            )
+        );
 
         System.out.println("\n\nМногочлен из кольца вычетов");
         System.out.print("Введите модуль: ");
